@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard</title>
+
+    <link rel="stylesheet"
+        href="css/dashboard.css">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="logo-section">
+
+                <i class="fa-solid fa-user-check dashboard-logo"></i>
+
+                
+
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <a href="#">
+                    <i class="fa-solid fa-house"></i>
+                    Dashboard
+                </a>
+
+                <a href="#enrollSection">
+                    <i class="fa-solid fa-book"></i>
+                    Enroll Class
+                </a>
+
+                <a href="#qrSection">
+                    <i class="fa-solid fa-qrcode"></i>
+                    Scan QR
+                </a>
+
+                <a href="#recordsSection">
+                    <i class="fa-solid fa-table"></i>
+                    Attendance Records
+                </a>
+
+                <a href="#percentageSection">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    Attendance Percentage
+                </a>
+
+                <a href="#notificationSection">
+                    <i class="fa-solid fa-bell"></i>
+                    Notifications
+                </a>
+
+            </nav>
+
+            <!-- MODULES -->
+
+            <div class="module-section">
+
+                <h3>
+                    My Modules
+                </h3>
+
+                <div id="moduleList">
+
+                </div>
+
+            </div>
+
+            <!-- LOGOUT -->
+
+            <div class="logout-section">
+
+                <a href="#" id="logoutBtn">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+
+        <div class="main-content">
+
+            <!-- HEADER -->
+
+            <header class="top-header">
+
+                <div class="dashboard-title-section">
+
+                    <i class="fa-solid fa-user dashboard-main-logo"></i>
+
+                    <div>
+
+                        <h1>
+                            Smart Attendance Tracker System
+                        </h1>
+
+                        <p>
+                            Student Dashboard
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="student-profile">
+
+                    <i class="fa-solid fa-user"></i>
+
+                    <span id="studentName">
+                        Student
+                    </span>
+
+                </div>
+
+            </header>
+
+            <!-- MAIN -->
+
+            <main>
+
+                <!-- WELCOME -->
+
+                <section class="welcome-card">
+
+                    <h2 id="welcomeText">
+                        Welcome Back!
+                    </h2>
+
+                    <p>
+                        Manage attendance,
+                        enroll in modules and
+                        track attendance records.
+                    </p>
+
+                </section>
+
+                <!-- STATS -->
+
+                <section class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <h3>Total Classes</h3>
+
+                        <p id="totalClasses">
+                            0
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>Classes Attended</h3>
+
+                        <p id="attendedClasses">
+                            0
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>Attendance %</h3>
+
+                        <p id="attendancePercentage">
+                            0%
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>Allowed Absences</h3>
+
+                        <p id="allowedAbsences">
+                            0
+                        </p>
+
+                    </div>
+
+                </section>
+
+                <!-- ENROLL -->
+
+                <section
+                    class="dashboard-section"
+                    id="enrollSection">
+
+                    <h2>
+                        Enroll Module
+                    </h2>
+
+                    <form id="enrollForm">
+
+                        <input
+                            type="text"
+                            id="courseName"
+                            placeholder="Enter Module Name">
+
+                        <button type="submit">
+
+                            Enroll Module
+
+                        </button>
+
+                    </form>
+
+                    <div id="enrollMessage"></div>
+
+                </section>
+
+                <!-- QR -->
+
+                <section
+                    class="dashboard-section"
+                    id="qrSection">
+
+                    <h2>
+                        QR Attendance Scanner
+                    </h2>
+
+                    <div class="qr-box">
+
+                        <i class="fa-solid fa-qrcode"></i>
+
+                        <p>
+                            QR Scanner Simulation
+                        </p>
+
+                    </div>
+
+                    <button id="scanButton">
+
+                        Scan QR & Mark Attendance
+
+                    </button>
+
+                    <p id="scanMessage"></p>
+
+                </section>
+
+                <!-- PERCENTAGE -->
+
+                <section
+                    class="dashboard-section"
+                    id="percentageSection">
+
+                    <h2>
+                        Attendance Percentage
+                    </h2>
+
+                    <div class="progress-container">
+
+                        <div class="progress-circle">
+
+                            <span id="progressText">
+
+                                0%
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="warning-box"
+                        id="warningBox">
+
+                        Warning!
+                        Attendance below 90%
+
+                    </div>
+
+                </section>
+
+                <!-- SEARCH -->
+
+                <section class="dashboard-section">
+
+                    <h2>
+                        Search & Filter
+                    </h2>
+
+                    <div class="search-filter-box">
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search Module">
+
+                        <select id="filterSelect">
+
+                            <option value="all">
+                                All
+                            </option>
+
+                            <option value="present">
+                                Present
+                            </option>
+
+                            <option value="absent">
+                                Absent
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </section>
+
+                <!-- RECORDS -->
+
+                <section
+                    class="dashboard-section"
+                    id="recordsSection">
+
+                    <h2>
+                        Attendance Records
+                    </h2>
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Module
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="attendanceTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </section>
+
+                <!-- NOTIFICATIONS -->
+
+                <section
+                    class="dashboard-section"
+                    id="notificationSection">
+
+                    <h2>
+                        Notifications
+                    </h2>
+
+                    <div class="notification-card">
+
+                        Attendance system active.
+
+                    </div>
+
+                    <div class="notification-card">
+
+                        Enroll modules to begin tracking.
+
+                    </div>
+
+                </section>
+
+            </main>
+
+            <!-- FOOTER -->
+
+            <footer>
+
+                <p>
+                    Smart Attendance Tracker System © 2026
+                </p>
+
+            </footer>
+
+        </div>
+
+    </div>
+
+    <script src="js/dashboard.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Tutor Dashboard</title>
+
+    <link rel="stylesheet"
+        href="css/tutor-dashboard.css">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="logo-section">
+
+                <i class="fa-solid fa-user-check dashboard-logo"></i>
+
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <a href="#">
+                    <i class="fa-solid fa-house"></i>
+                    Dashboard
+                </a>
+
+                <a href="#createSection">
+                    <i class="fa-solid fa-book"></i>
+                    Create Module
+                </a>
+
+                <a href="#qrSection">
+                    <i class="fa-solid fa-qrcode"></i>
+                    Generate QR
+                </a>
+
+                <a href="#studentSection">
+                    <i class="fa-solid fa-users"></i>
+                    Student List
+                </a>
+
+                <a href="#attendanceSection">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    Attendance Session
+                </a>
+
+                <a href="#reportSection">
+                    <i class="fa-solid fa-chart-column"></i>
+                    Attendance Report
+                </a>
+
+            </nav>
+
+            <!-- MODULES -->
+
+            <div class="module-section">
+
+                <h3>
+                    Created Modules
+                </h3>
+
+                <div id="moduleList">
+
+                </div>
+
+            </div>
+
+            <!-- LOGOUT -->
+
+            <div class="logout-section">
+
+                <a href="#" id="logoutBtn">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+
+        <div class="main-content">
+
+            <!-- HEADER -->
+
+            <header class="top-header">
+
+                <div class="dashboard-title-section">
+
+                    <i class="fa-solid fa-user-tie dashboard-main-logo"></i>
+
+                    <div>
+
+                        <h1>
+                            Smart Attendance Tracker System
+                        </h1>
+
+                        <p>
+                            Tutor Dashboard
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="student-profile">
+
+                    <i class="fa-solid fa-user"></i>
+
+                    <span id="tutorName">
+                        Tutor
+                    </span>
+
+                </div>
+
+            </header>
+
+            <!-- MAIN -->
+
+            <main>
+
+                <!-- WELCOME -->
+
+                <section class="welcome-card">
+
+                    <h2 id="welcomeText">
+                        Welcome Back!
+                    </h2>
+
+                    <p>
+                        Create modules,
+                        manage students and
+                        generate QR attendance.
+                    </p>
+
+                </section>
+
+                <!-- STATS -->
+
+                <section class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <h3>Total Modules</h3>
+
+                        <p id="totalModules">
+                            0
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>Total Students</h3>
+
+                        <p id="totalStudents">
+                            0
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>Attendance Sessions</h3>
+
+                        <p id="totalSessions">
+                            0
+                        </p>
+
+                    </div>
+
+                    <div class="stat-card">
+
+                        <h3>QR Generated</h3>
+
+                        <p id="qrCount">
+                            0
+                        </p>
+
+                    </div>
+
+                </section>
+
+                <!-- CREATE MODULE -->
+
+                <section
+                    class="dashboard-section"
+                    id="createSection">
+
+                    <h2>
+                        Create Module
+                    </h2>
+
+                    <form id="moduleForm">
+
+                        <input
+                            type="text"
+                            id="moduleName"
+                            placeholder="Enter Module Name">
+
+                        <button type="submit">
+
+                            Create Module
+
+                        </button>
+
+                    </form>
+
+                    <div id="moduleMessage"></div>
+
+                </section>
+
+                <!-- QR SECTION -->
+
+                <section
+                    class="dashboard-section"
+                    id="qrSection">
+
+                    <h2>
+                        Generate QR Code
+                    </h2>
+
+                    <div class="qr-box">
+
+                        <i class="fa-solid fa-qrcode"></i>
+
+                        <p id="qrText">
+                            QR Code Ready
+                        </p>
+
+                    </div>
+
+                    <button id="generateQrBtn">
+
+                        Generate QR
+
+                    </button>
+
+                </section>
+
+                <!-- STUDENTS -->
+
+                <section
+                    class="dashboard-section"
+                    id="studentSection">
+
+                    <h2>
+                        Enrolled Students
+                    </h2>
+
+                    <form id="studentForm">
+
+                        <input
+                            type="text"
+                            id="studentFullName"
+                            placeholder="Student Name">
+
+                        <input
+                            type="text"
+                            id="studentId"
+                            placeholder="Student ID">
+
+                        <input
+                            type="text"
+                            id="studentModule"
+                            placeholder="Module Name">
+
+                        <button type="submit">
+
+                            Add Student
+
+                        </button>
+
+                    </form>
+
+                    <div id="studentMessage"></div>
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Student Name
+                                </th>
+
+                                <th>
+                                    Student ID
+                                </th>
+
+                                <th>
+                                    Module
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="studentTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </section>
+
+                <!-- ATTENDANCE -->
+
+                <section
+                    class="dashboard-section"
+                    id="attendanceSection">
+
+                    <h2>
+                        Attendance Session
+                    </h2>
+
+                    <form id="attendanceForm">
+
+                        <input
+                            type="text"
+                            id="attendanceModule"
+                            placeholder="Module Name">
+
+                        <input
+                            type="time"
+                            id="attendanceTime">
+
+                        <button type="submit">
+
+                            Start Attendance
+
+                        </button>
+
+                    </form>
+
+                    <div id="attendanceMessage"></div>
+
+                </section>
+
+                <!-- REPORT -->
+
+                <section
+                    class="dashboard-section"
+                    id="reportSection">
+
+                    <h2>
+                        Attendance Report
+                    </h2>
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Module
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Time
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="reportTableBody">
+
+                        </tbody>
+
+                    </table>
+
+                </section>
+
+            </main>
+
+            <!-- FOOTER -->
+
+            <footer>
+
+                <p>
+                    Smart Attendance Tracker System © 2026
+                </p>
+
+            </footer>
+
+        </div>
+
+    </div>
+
+    <script src="js/tutor-dashboard.js"></script>
+
+</body>
+
+</html>
