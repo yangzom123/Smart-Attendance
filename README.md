@@ -223,14 +223,9 @@ Attendance record saved → student marked present
 4. Every API call includes `Authorization: Bearer <token>` header
 5. `authMiddleware.js` verifies token → attaches user to `req.user`
 
----
-
-## Academic Integrity
-
-This is an individual academic project submitted for CTE204 at the Royal University of Bhutan. All code is original work. External libraries are credited in the Tech Stack section above.
 
 ---
 
 ## License
 
-For academic submission purposes only.
+For academic purposes only.
