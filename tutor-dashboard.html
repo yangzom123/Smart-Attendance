@@ -190,10 +190,10 @@
 
                     <div class="stat-card">
 
-                        <h3>QR Generated</h3>
+                        <h3>Active Session</h3>
 
                         <p id="qrCount">
-                            0
+                            None
                         </p>
 
                     </div>
@@ -241,10 +241,10 @@
 
                     <div class="qr-box">
 
-                        <i class="fa-solid fa-qrcode"></i>
+                        <div id="qrCodeCanvas"></div>
 
                         <p id="qrText">
-                            QR Code Ready
+                            Start an attendance session, then click Generate
                         </p>
 
                     </div>
@@ -413,6 +413,7 @@
 
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/tutor-dashboard.js"></script>
 
 </body>

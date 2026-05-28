@@ -1,9 +1,10 @@
-const loggedInUser =
-    JSON.parse(localStorage.getItem("loggedInStudent"));
+const loggedInUser = JSON.parse(localStorage.getItem("loggedInStudent"));
 
 if (!loggedInUser) {
     window.location.href = "home.html";
 }
+
+const BASE_URL = "http://localhost:5000";
 
 const welcomeText = document.getElementById("welcomeText");
 const studentName = document.getElementById("studentName");
@@ -24,46 +25,84 @@ if (loggedInUser) {
     studentName.textContent = loggedInUser.name;
 }
 
-let tutorModules =
-    JSON.parse(localStorage.getItem("tutorModules")) || [];
+// In-memory state — loaded from API on each refresh
+let myModules = [];
+let attendanceRecords = [];
+let html5QrcodeScanner = null;
+let isScanning = false;
 
-let enrolledStudents =
-    JSON.parse(localStorage.getItem("enrolledStudents")) || [];
-
-let attendanceSessions =
-    JSON.parse(localStorage.getItem("attendanceSessions")) || [];
-
-let attendanceRecords =
-    JSON.parse(localStorage.getItem("attendanceRecords")) || [];
-
-function normalize(value) {
-    return value.trim().toLowerCase();
+// Attach the token to every API request
+function getAuthHeader() {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
 }
 
-function saveEnrolledStudents() {
-    localStorage.setItem(
-        "enrolledStudents",
-        JSON.stringify(enrolledStudents)
+// ─── DISPLAY FUNCTIONS (same logic as before) ────────────────────────────────
+
+function displayModules() {
+    moduleList.textContent = "";
+
+    myModules.forEach((module) => {
+        const div = document.createElement("div");
+        div.classList.add("module-item");
+        div.textContent = module.name;
+        moduleList.appendChild(div);
+    });
+}
+
+function displayAttendance(records) {
+    attendanceTableBody.textContent = "";
+
+    records.forEach((record) => {
+        const row = document.createElement("tr");
+
+        const subjectTd = document.createElement("td");
+        subjectTd.textContent = record.subject;
+
+        const dateTd = document.createElement("td");
+        dateTd.textContent = new Date(record.date).toLocaleDateString();
+
+        const statusTd = document.createElement("td");
+        statusTd.textContent = record.status;
+        statusTd.classList.add(record.status.toLowerCase());
+
+        row.appendChild(subjectTd);
+        row.appendChild(dateTd);
+        row.appendChild(statusTd);
+        attendanceTableBody.appendChild(row);
+    });
+}
+
+function updateStatistics() {
+    const totalClasses = attendanceRecords.length;
+    const attendedClasses = attendanceRecords.filter(
+        (record) => record.status === "Present"
+    ).length;
+
+    let percentage = 0;
+
+    if (totalClasses > 0) {
+        percentage = (attendedClasses / totalClasses) * 100;
+    }
+
+    const allowedAbsences = Math.max(
+        totalClasses - Math.ceil(totalClasses * 0.9),
+        0
     );
-}
 
-function saveAttendanceRecords() {
-    localStorage.setItem(
-        "attendanceRecords",
-        JSON.stringify(attendanceRecords)
-    );
-}
+    document.getElementById("totalClasses").textContent = totalClasses;
+    document.getElementById("attendedClasses").textContent = attendedClasses;
+    document.getElementById("attendancePercentage").textContent =
+        percentage.toFixed(0) + "%";
+    document.getElementById("progressText").textContent =
+        percentage.toFixed(0) + "%";
+    document.getElementById("allowedAbsences").textContent = allowedAbsences;
 
-function getMyModules() {
-    return enrolledStudents
-        .filter((student) => student.id === loggedInUser.id)
-        .map((student) => student.module);
-}
-
-function getMyAttendanceRecords() {
-    return attendanceRecords.filter(
-        (record) => record.studentId === loggedInUser.id
-    );
+    warningBox.style.display =
+        percentage < 90 && totalClasses > 0 ? "block" : "none";
 }
 
 function clearPlaceholders() {
@@ -84,90 +123,30 @@ function clearPlaceholders() {
     });
 }
 
-function displayModules() {
-    moduleList.textContent = "";
+// ─── LOAD ALL DATA FROM API ───────────────────────────────────────────────────
 
-    getMyModules().forEach((module) => {
-        const div = document.createElement("div");
-        div.classList.add("module-item");
-        div.textContent = module;
-        moduleList.appendChild(div);
-    });
-}
+async function loadDashboardData() {
+    try {
+        const [modulesRes, recordsRes] = await Promise.all([
+            fetch(`${BASE_URL}/api/enroll/my-modules`, { headers: getAuthHeader() }),
+            fetch(`${BASE_URL}/api/attendance/records/my`, { headers: getAuthHeader() })
+        ]);
 
-function displayAttendance(records) {
-    attendanceTableBody.textContent = "";
+        myModules = await modulesRes.json();
+        attendanceRecords = await recordsRes.json();
 
-    records.forEach((record) => {
-        const row = document.createElement("tr");
+        displayModules();
+        displayAttendance(attendanceRecords);
+        updateStatistics();
 
-        const subjectTd = document.createElement("td");
-        subjectTd.textContent = record.subject;
-
-        const dateTd = document.createElement("td");
-        dateTd.textContent = record.date;
-
-        const statusTd = document.createElement("td");
-        statusTd.textContent = record.status;
-        statusTd.classList.add(record.status.toLowerCase());
-
-        row.appendChild(subjectTd);
-        row.appendChild(dateTd);
-        row.appendChild(statusTd);
-        attendanceTableBody.appendChild(row);
-    });
-}
-
-function updateStatistics() {
-    const myRecords = getMyAttendanceRecords();
-    const totalClasses = myRecords.length;
-    const attendedClasses = myRecords.filter(
-        (record) => record.status === "Present"
-    ).length;
-
-    let percentage = 0;
-
-    if (totalClasses > 0) {
-        percentage = (attendedClasses / totalClasses) * 100;
+    } catch (err) {
+        console.error("Failed to load dashboard data:", err);
     }
-
-    const allowedAbsences = Math.max(
-        totalClasses - Math.ceil(totalClasses * 0.9),
-        0
-    );
-
-    document.getElementById("totalClasses").textContent = totalClasses;
-    document.getElementById("attendedClasses").textContent =
-        attendedClasses;
-    document.getElementById("attendancePercentage").textContent =
-        percentage.toFixed(0) + "%";
-    document.getElementById("progressText").textContent =
-        percentage.toFixed(0) + "%";
-    document.getElementById("allowedAbsences").textContent =
-        allowedAbsences;
-
-    warningBox.style.display =
-        percentage < 90 && totalClasses > 0 ? "block" : "none";
 }
 
-function refreshDashboard() {
-    tutorModules =
-        JSON.parse(localStorage.getItem("tutorModules")) || [];
-    enrolledStudents =
-        JSON.parse(localStorage.getItem("enrolledStudents")) || [];
-    attendanceSessions =
-        JSON.parse(localStorage.getItem("attendanceSessions")) || [];
-    attendanceRecords =
-        JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+// ─── ENROLL IN MODULE (student self-enrolls) ──────────────────────────────────
 
-    const myRecords = getMyAttendanceRecords();
-
-    displayModules();
-    displayAttendance(myRecords);
-    updateStatistics();
-}
-
-enrollForm.addEventListener("submit", (event) => {
+enrollForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const moduleName = courseName.value.trim();
@@ -178,126 +157,124 @@ enrollForm.addEventListener("submit", (event) => {
         return;
     }
 
-    const moduleExists = tutorModules.some(
-        (module) => normalize(module) === normalize(moduleName)
-    );
+    try {
+        const response = await fetch(`${BASE_URL}/api/enroll`, {
+            method: "POST",
+            headers: getAuthHeader(),
+            body: JSON.stringify({ moduleName })
+        });
 
-    if (!moduleExists) {
-        enrollMessage.textContent = "This module has not been created by tutor";
+        const data = await response.json();
+
+        if (!response.ok) {
+            enrollMessage.textContent = data.message;
+            enrollMessage.style.color = "red";
+            return;
+        }
+
+        enrollMessage.textContent = "Module Enrolled Successfully";
+        enrollMessage.style.color = "lightgreen";
+        enrollForm.reset();
+        await loadDashboardData();
+
+    } catch (err) {
+        enrollMessage.textContent = "Server error. Try again.";
         enrollMessage.style.color = "red";
-        return;
     }
-
-    const alreadyEnrolled = enrolledStudents.some(
-        (student) =>
-            student.id === loggedInUser.id &&
-            normalize(student.module) === normalize(moduleName)
-    );
-
-    if (alreadyEnrolled) {
-        enrollMessage.textContent = "Already enrolled in this module";
-        enrollMessage.style.color = "red";
-        return;
-    }
-
-    enrolledStudents.push({
-        name: loggedInUser.name,
-        id: loggedInUser.id,
-        module: moduleName
-    });
-
-    saveEnrolledStudents();
-    displayModules();
-
-    enrollMessage.textContent = "Module Enrolled Successfully";
-    enrollMessage.style.color = "lightgreen";
-
-    enrollForm.reset();
 });
+
+// ─── SCAN QR / MARK ATTENDANCE ────────────────────────────────────────────────
+
+async function onScanSuccess(decodedText) {
+    await html5QrcodeScanner.clear();
+    isScanning = false;
+    scanButton.disabled = false;
+    scanButton.textContent = "Start QR Scanner";
+
+    if (!decodedText.startsWith("attendance:")) {
+        scanMessage.textContent = "Invalid QR code — not an attendance code";
+        scanMessage.style.color = "red";
+        return;
+    }
+
+    const sessionId = parseInt(decodedText.split(":")[1], 10);
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/attendance/scan`, {
+            method: "POST",
+            headers: getAuthHeader(),
+            body: JSON.stringify({ sessionId })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            scanMessage.textContent = data.message;
+            scanMessage.style.color = "red";
+            return;
+        }
+
+        scanMessage.textContent = "Attendance marked successfully!";
+        scanMessage.style.color = "lightgreen";
+        await loadDashboardData();
+
+    } catch (err) {
+        scanMessage.textContent = "Server error. Try again.";
+        scanMessage.style.color = "red";
+    }
+}
 
 scanButton.addEventListener("click", () => {
-    refreshDashboard();
+    if (isScanning) return;
 
-    const activeSession = attendanceSessions.find(
-        (session) => session.active
+    isScanning = true;
+    scanMessage.textContent = "";
+    scanButton.disabled = true;
+    scanButton.textContent = "Scanner Active...";
+
+    html5QrcodeScanner = new Html5QrcodeScanner(
+        "qrReader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        false
     );
 
-    if (!activeSession) {
-        scanMessage.textContent = "No active attendance session";
-        scanMessage.style.color = "red";
-        return;
-    }
-
-    const isEnrolled = getMyModules().some(
-        (module) => normalize(module) === normalize(activeSession.module)
-    );
-
-    if (!isEnrolled) {
-        scanMessage.textContent =
-            `You are not enrolled in ${activeSession.module}`;
-        scanMessage.style.color = "red";
-        return;
-    }
-
-    const alreadyMarked = attendanceRecords.some(
-        (record) =>
-            record.studentId === loggedInUser.id &&
-            record.sessionId === activeSession.id
-    );
-
-    if (alreadyMarked) {
-        scanMessage.textContent = "Attendance already marked for this session";
-        scanMessage.style.color = "red";
-        return;
-    }
-
-    attendanceRecords.push({
-        sessionId: activeSession.id,
-        studentId: loggedInUser.id,
-        studentName: loggedInUser.name,
-        subject: activeSession.module,
-        date: activeSession.date,
-        time: activeSession.time,
-        status: "Present"
-    });
-
-    saveAttendanceRecords();
-    refreshDashboard();
-
-    scanMessage.textContent =
-        `Attendance Marked For ${activeSession.module}`;
-    scanMessage.style.color = "lightgreen";
+    html5QrcodeScanner.render(onScanSuccess, () => {});
 });
+
+// ─── SEARCH & FILTER (works on in-memory records — no API call needed) ────────
 
 searchInput.addEventListener("keyup", () => {
     const value = searchInput.value.toLowerCase();
-    const filtered = getMyAttendanceRecords().filter((record) =>
+    const filtered = attendanceRecords.filter((record) =>
         record.subject.toLowerCase().includes(value)
     );
-
     displayAttendance(filtered);
 });
 
 filterSelect.addEventListener("change", () => {
     const value = filterSelect.value;
-    const myRecords = getMyAttendanceRecords();
 
     if (value === "all") {
-        displayAttendance(myRecords);
+        displayAttendance(attendanceRecords);
         return;
     }
 
-    const filtered = myRecords.filter(
+    const filtered = attendanceRecords.filter(
         (record) => record.status.toLowerCase() === value
     );
-
     displayAttendance(filtered);
 });
 
+// ─── LOGOUT ───────────────────────────────────────────────────────────────────
+
 logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
     localStorage.removeItem("loggedInStudent");
     window.location.href = "home.html";
 });
 
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
 clearPlaceholders();
-refreshDashboard();
+loadDashboardData();
+setInterval(() => { if (!isScanning) loadDashboardData(); }, 10000);

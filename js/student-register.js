@@ -1,6 +1,8 @@
 const form = document.getElementById("studentRegisterForm");
 const message = document.getElementById("message");
 
+const BASE_URL = "http://localhost:5000";
+
 window.addEventListener("load", () => {
     form.reset();
     clearPlaceholders();
@@ -24,26 +26,7 @@ function clearPlaceholders() {
     });
 }
 
-function getStudents() {
-    const students =
-        JSON.parse(localStorage.getItem("registeredStudents")) || [];
-    const oldStudent = JSON.parse(localStorage.getItem("studentUser"));
-
-    if (
-        oldStudent &&
-        !students.some((student) => student.id === oldStudent.id)
-    ) {
-        students.push(oldStudent);
-        localStorage.setItem(
-            "registeredStudents",
-            JSON.stringify(students)
-        );
-    }
-
-    return students;
-}
-
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const name = document.getElementById("studentName").value.trim();
@@ -77,35 +60,31 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    const students = getStudents();
-    const studentExists = students.some(
-        (student) => student.id === id || student.email === email
-    );
+    try {
+        const response = await fetch(`${BASE_URL}/api/auth/register/student`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, id, email, password })
+        });
 
-    if (studentExists) {
-        message.textContent = "Student ID or email already registered";
+        const data = await response.json();
+
+        if (!response.ok) {
+            message.textContent = data.message;
+            message.style.color = "red";
+            return;
+        }
+
+        message.textContent = "Registered Successfully!";
+        message.style.color = "lightgreen";
+        form.reset();
+
+        setTimeout(() => {
+            window.location.href = "home.html";
+        }, 1000);
+
+    } catch (err) {
+        message.textContent = "Could not connect to server. Try again.";
         message.style.color = "red";
-        return;
     }
-
-    const student = {
-        name: name,
-        id: id,
-        email: email,
-        password: password,
-        role: "student"
-    };
-
-    students.push(student);
-    localStorage.setItem("registeredStudents", JSON.stringify(students));
-    localStorage.setItem("studentUser", JSON.stringify(student));
-
-    message.textContent = "Registered Successfully!";
-    message.style.color = "lightgreen";
-
-    form.reset();
-
-    setTimeout(() => {
-        window.location.href = "home.html";
-    }, 1000);
 });

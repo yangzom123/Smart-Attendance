@@ -1,6 +1,8 @@
 const form = document.getElementById("tutorRegisterForm");
 const message = document.getElementById("message");
 
+const BASE_URL = "http://localhost:5000";
+
 window.addEventListener("load", () => {
     form.reset();
     clearPlaceholders();
@@ -24,23 +26,7 @@ function clearPlaceholders() {
     });
 }
 
-function getTutors() {
-    const tutors =
-        JSON.parse(localStorage.getItem("registeredTutors")) || [];
-    const oldTutor = JSON.parse(localStorage.getItem("tutorUser"));
-
-    if (
-        oldTutor &&
-        !tutors.some((tutor) => tutor.id === oldTutor.id)
-    ) {
-        tutors.push(oldTutor);
-        localStorage.setItem("registeredTutors", JSON.stringify(tutors));
-    }
-
-    return tutors;
-}
-
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const name = document.getElementById("tutorName").value.trim();
@@ -74,35 +60,31 @@ form.addEventListener("submit", (event) => {
         return;
     }
 
-    const tutors = getTutors();
-    const tutorExists = tutors.some(
-        (tutor) => tutor.id === id || tutor.email === email
-    );
+    try {
+        const response = await fetch(`${BASE_URL}/api/auth/register/tutor`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, id, email, password })
+        });
 
-    if (tutorExists) {
-        message.textContent = "Tutor ID or email already registered";
+        const data = await response.json();
+
+        if (!response.ok) {
+            message.textContent = data.message;
+            message.style.color = "red";
+            return;
+        }
+
+        message.textContent = "Registered Successfully!";
+        message.style.color = "lightgreen";
+        form.reset();
+
+        setTimeout(() => {
+            window.location.href = "home.html";
+        }, 1000);
+
+    } catch (err) {
+        message.textContent = "Could not connect to server. Try again.";
         message.style.color = "red";
-        return;
     }
-
-    const tutor = {
-        name: name,
-        id: id,
-        email: email,
-        password: password,
-        role: "tutor"
-    };
-
-    tutors.push(tutor);
-    localStorage.setItem("registeredTutors", JSON.stringify(tutors));
-    localStorage.setItem("tutorUser", JSON.stringify(tutor));
-
-    message.textContent = "Registered Successfully!";
-    message.style.color = "lightgreen";
-
-    form.reset();
-
-    setTimeout(() => {
-        window.location.href = "home.html";
-    }, 1000);
 });
